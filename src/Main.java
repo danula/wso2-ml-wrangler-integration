@@ -37,43 +37,10 @@ public final class Main {
         boolean flag = false;
 
         WranglerOperation wo = new WranglerOperation();
-        Pattern pattern;
-        Matcher matcher;
 
         while(scanner.hasNextLine()){
             String line = scanner.nextLine();
-            line = line.trim();
-            if(line.equals(")")) {
-                System.out.println("##############");
-                flag = false;
-            }
-
-            if(line.startsWith("w.add(")){
-                pattern = Pattern.compile("\\.[a-z_]+\\(");
-                matcher = pattern.matcher(line);
-                matcher.find();
-                matcher.find();
-                String operation = matcher.group();
-                operation = operation.substring(1,operation.length()-1);
-                wo.setOperation(operation);
-                flag = true;
-                System.out.println("##############");
-                line = line.substring(9);
-            }
-            if(flag){
-                pattern = Pattern.compile("\\.[a-z_]+\\(");
-                matcher = pattern.matcher(line);
-                if(matcher.find()){
-                    String param = matcher.group();
-                    param = param.substring(1,param.length()-1);
-                    line = line.substring(matcher.end());
-                    String value = line.substring(matcher.groupCount(),line.length()-1);
-                    if(!value.equals("undefined")){
-                        wo.addParameter(param, value);
-                    }
-                }
-
-            }
+            flag = parseLine(line,flag,wo);
         }
 
 
@@ -127,7 +94,7 @@ public final class Main {
         jsc.stop();
     }
 
-    private static JavaRDD<Row> deleteRows(JavaRDD<Row> data, final int columnId, final String value) {
+    private static JavaRDD<Row> deleteRows(JavaRDD<Row> data, final int columnId, String operation,final String value) {
         return data.filter(new Function<Row, Boolean>() {
             @Override
             public Boolean call(Row row) throws Exception {
@@ -160,14 +127,14 @@ public final class Main {
                 if (row == null) return null;
                 if (row.isNullAt(columnIndex)) {
                     String[] list = new String[row.length() + 1];
-                    for(int i=0,j=0;i<=row.length();i++,j++){
-                        if(row.isNullAt(j)){
+                    for (int i = 0, j = 0; i <= row.length(); i++, j++) {
+                        if (row.isNullAt(j)) {
                             list[i] = null;
-                            if(i==columnIndex){
+                            if (i == columnIndex) {
                                 i++;
-                                list[i]=null;
+                                list[i] = null;
                             }
-                        }else{
+                        } else {
                             list[i] = row.getString(j);
                         }
                     }
@@ -175,7 +142,7 @@ public final class Main {
                     return Row.create(list);
                 } else {
                     String[] list = new String[row.length() + 1];
-                    for (int i = 0,j=0; i <= row.length(); i++,j++) {
+                    for (int i = 0, j = 0; i <= row.length(); i++, j++) {
                         if (columnIndex == i) {
                             String val = row.getString(j);
                             Pattern pattern = Pattern.compile(after + on + before);
@@ -186,15 +153,15 @@ public final class Main {
 //                                System.out.println(matcher);
 //                                System.out.println(val);
 //                                System.out.println(matcher.start()+" "+after.length()+"  "+matcher.end()+" " +before.length());
-                                list[i + 1] = val.substring(matcher.start() + after.length(),matcher.end()-before.length());
+                                list[i + 1] = val.substring(matcher.start() + after.length(), matcher.end() - before.length());
                             } else {
                                 list[i + 1] = null;
                             }
                             i++;
                         } else {
-                            if(row.isNullAt(j)){
+                            if (row.isNullAt(j)) {
                                 list[i] = null;
-                            }else{
+                            } else {
                                 list[i] = row.getString(j);
                             }
                         }
@@ -209,5 +176,62 @@ public final class Main {
         for (int i = 0; i < row.length(); i++) {
             System.out.print(row.get(i) + "  ");
         }
+    }
+
+    private static boolean parseLine(String line,boolean flag,WranglerOperation wo){
+        Pattern pattern;
+        Matcher matcher;
+
+        line = line.trim();
+        if(line.equals(")")) {
+            System.out.println("##############");
+            return false;
+        }
+
+        if(line.startsWith("w.add(")){
+            pattern = Pattern.compile("\\.[a-z_]+\\(");
+            matcher = pattern.matcher(line);
+            matcher.find();
+            matcher.find();
+            String operation = matcher.group();
+            operation = operation.substring(1,operation.length()-1);
+            System.out.println("+++++"+operation+"++++++++");
+            wo.setOperation(operation);
+            flag = true;
+            line = line.substring(9);
+        }
+        if(line.matches(".*dw\\.[a-z_]+\\(.*")){
+            String l1 = line.substring(1,line.indexOf('('));
+            System.out.println("+++++"+l1+"++++++++");
+            pattern = Pattern.compile("\\.[a-z_]+\\(");
+            matcher = pattern.matcher(line);
+            matcher.find();
+            matcher.find();
+            System.out.println(matcher.group());
+
+            line = line.replaceAll(".*dw\\.[a-z_]+\\(","");
+
+        }
+
+        if(flag){
+            pattern = Pattern.compile("\\.[a-z_]+\\(");
+            matcher = pattern.matcher(line);
+            if(matcher.find()){
+                String param = matcher.group();
+                param = param.substring(1,param.length()-1);
+                line = line.substring(matcher.end());
+
+                if(line.matches(".*dw\\.[a-z_]+\\(.*")){
+
+                    System.out.println(line);
+                }
+                String value = line.substring(matcher.groupCount(),line.length()-1);
+                if(!value.equals("undefined")){
+                    wo.addParameter(param, value);
+                }
+            }
+
+        }
+        return flag;
     }
 }
