@@ -24,6 +24,7 @@ import java.util.List;
 public final class Main {
     public static JavaSparkContext jsc;
     static int numberOfColumns;
+    static WranglerOperation wo;
 
     public static void main(String[] args) throws Exception {
 
@@ -36,7 +37,7 @@ public final class Main {
         Scanner scanner = new Scanner(path);
         boolean flag = false;
 
-        WranglerOperation wo = new WranglerOperation();
+        wo = new WranglerOperation();
 
         while(scanner.hasNextLine()){
             String line = scanner.nextLine();
@@ -76,101 +77,32 @@ public final class Main {
                         return null;
                     }
                 });
-
+        System.out.println(wo.getOperation());
+        System.out.println(wo.getParameter("conditions"));
+        System.out.println(wo.getParameter("indices"));
+        System.out.println(rowRDD.count());
         JavaRDD<Row> rowRDD4 = wo.executeOperation(jsc,rowRDD);
         //JavaRDD<Row> rowRDD4 = wo.executeOperation(jsc,rowRDD);
-        //JavaRDD<Row> rowRDD3 = deleteRows(rowRDD, 1, "4029.3");
+        //JavaRDD<Row> rowRDD3 = filter(rowRDD, 1, "4029.3");
         //JavaRDD<Row> rowRDD4 = split(rowRDD, 0, " in ", "[a-zA-Z]+", ".*");
         //JavaRDD<Row> rowRDD4 = extract(rowRDD, 0, ".*","","crime ");
         //JavaRDD<Row> rowRDD5 = fillColumn(rowRDD, 1, "below");
         //JavaRDD<Row> rowRDD6 = fillColumn(rowRDD, 0, "right");
         //System.out.println(rowRDDP.first());
         //System.out.println(rowRDD.collect().get(2).get(14));
-        printRow(rowRDD4.collect().get(0));
-        printRow(rowRDD4.collect().get(1));
+//        printRow(rowRDD4.collect().get(6));
+//        printRow(rowRDD4.collect().get(7));
+//        printRow(rowRDD4.collect().get(8));
         //printRow(rowRDD4.collect().get(1));
         //printRow(rowRDD6.collect().get(3));
+        System.out.println(rowRDD4.count());
 
         jsc.stop();
     }
 
-    private static JavaRDD<Row> deleteRows(JavaRDD<Row> data, final int columnId, String operation,final String value) {
-        return data.filter(new Function<Row, Boolean>() {
-            @Override
-            public Boolean call(Row row) throws Exception {
-                if (row == null) {
-                    if (value == null) {
-                        return false;
-                    } else {
-                        return true;
-                    }
-                } else if (row.length() <= columnId) {
-                    if (value == null) {
-                        return false;
-                    } else {
-                        return true;
-                    }
-                }
-                if (row.get(columnId).equals(value)) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        });
-    }
 
-    private static JavaRDD<Row> extract(JavaRDD<Row> data,final int columnIndex,final String on, final String before,final String after){
-        return data.map(new Function<Row, Row>() {
-            @Override
-            public Row call(Row row) throws Exception {
-                if (row == null) return null;
-                if (row.isNullAt(columnIndex)) {
-                    String[] list = new String[row.length() + 1];
-                    for (int i = 0, j = 0; i <= row.length(); i++, j++) {
-                        if (row.isNullAt(j)) {
-                            list[i] = null;
-                            if (i == columnIndex) {
-                                i++;
-                                list[i] = null;
-                            }
-                        } else {
-                            list[i] = row.getString(j);
-                        }
-                    }
 
-                    return Row.create(list);
-                } else {
-                    String[] list = new String[row.length() + 1];
-                    for (int i = 0, j = 0; i <= row.length(); i++, j++) {
-                        if (columnIndex == i) {
-                            String val = row.getString(j);
-                            Pattern pattern = Pattern.compile(after + on + before);
-                            Matcher matcher = pattern.matcher(val);
-                            System.out.println(matcher.toString());
-                            if (matcher.find()) {
-                                list[i] = val;
-//                                System.out.println(matcher);
-//                                System.out.println(val);
-//                                System.out.println(matcher.start()+" "+after.length()+"  "+matcher.end()+" " +before.length());
-                                list[i + 1] = val.substring(matcher.start() + after.length(), matcher.end() - before.length());
-                            } else {
-                                list[i + 1] = null;
-                            }
-                            i++;
-                        } else {
-                            if (row.isNullAt(j)) {
-                                list[i] = null;
-                            } else {
-                                list[i] = row.getString(j);
-                            }
-                        }
-                    }
-                    return Row.create(list);
-                }
-            }
-        });
-    }
+
 
     private static void printRow(Row row) {
         for (int i = 0; i < row.length(); i++) {
@@ -200,28 +132,31 @@ public final class Main {
             flag = true;
             line = line.substring(9);
         }
-        if(line.matches(".*dw\\.[a-z_]+\\(.*")){
+        if(line.matches(".*dw\\.[a-zA-Z_]+\\(.*")){
             String l1 = line.substring(1,line.indexOf('('));
             System.out.println("+++++"+l1+"++++++++");
-            pattern = Pattern.compile("\\.[a-z_]+\\(");
+            pattern = Pattern.compile("\\.[a-zA-Z_]+\\(");
             matcher = pattern.matcher(line);
             matcher.find();
             matcher.find();
-            System.out.println(matcher.group());
+            String operation = matcher.group();
+            operation = operation.substring(1, operation.length()-1);
+            System.out.println("+++++"+operation+"++++++++");
+            wo.addParameter(l1,operation);
 
-            line = line.replaceAll(".*dw\\.[a-z_]+\\(","");
+            line = line.replaceAll(".*dw\\.[a-zA-Z_]+\\(","");
 
         }
 
         if(flag){
-            pattern = Pattern.compile("\\.[a-z_]+\\(");
+            pattern = Pattern.compile("\\.[a-zA-Z_]+\\(");
             matcher = pattern.matcher(line);
             if(matcher.find()){
                 String param = matcher.group();
                 param = param.substring(1,param.length()-1);
                 line = line.substring(matcher.end());
 
-                if(line.matches(".*dw\\.[a-z_]+\\(.*")){
+                if(line.matches(".*dw\\.[a-zA-Z_]+\\(.*")){
 
                     System.out.println(line);
                 }

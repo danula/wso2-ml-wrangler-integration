@@ -12,20 +12,10 @@ public class Test {
         ScriptEngine engine = factory.getEngineByName("JavaScript");
         try {
             
-            engine.eval("dw.split().column(\"data\")\n" +
-                    "                .table(0)\n" +
-                    "                .status(\"active\")\n" +
-                    "                .drop(true)\n" +
-                    "                .result(\"column\")\n" +
-                    "                .update(false)\n" +
-                    "                .insert_position(\"right\")\n" +
-                    "                .on(\",\")\n" +
-                    "                .before(\"sdfsd\")\n" +
-                    "                .after(\"ddss\")\n" +
-                    "                .which(1)\n" +
-                    "                .max(0);");
+            engine.eval("print('Hello')" );
         } catch (ScriptException e) {
             e.printStackTrace();
         }
+
     }
 }

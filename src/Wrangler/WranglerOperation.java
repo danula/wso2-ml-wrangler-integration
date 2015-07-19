@@ -1,6 +1,7 @@
 package Wrangler;
 
 import operations.SparkOperationFill;
+import operations.SparkOperationFilter;
 import operations.SparkOperationSplit;
 import operations.SparkOpration;
 import org.apache.spark.api.java.JavaRDD;
@@ -24,6 +25,9 @@ public class WranglerOperation {
     public HashMap<String, String> getParameters(){
         return paramters;
     }
+    public String getParameter(String parameter){
+        return paramters.get(parameter);
+    }
 
     public void addParameter(String param,String value){
         if(value.matches("\".*\"")){
@@ -38,13 +42,18 @@ public class WranglerOperation {
         switch (this.getOperation()){
             case "split" :
                 so = new SparkOperationSplit();
-                return so.execute(jsc,data,this);
+                break;
             case "fill":
                 so = new SparkOperationFill();
-                return so.execute(jsc,data,this);
+                break;
+            case "filter":
+                so = new SparkOperationFilter();
+                break;
+            default:
+                so = null;
 
         }
-        return null;
+        return so.execute(jsc,data,this);
     }
 
 
