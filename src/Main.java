@@ -77,9 +77,10 @@ public final class Main {
                         return null;
                     }
                 });
-        System.out.println(wo.getOperation());
-        System.out.println(wo.getParameter("conditions"));
-        System.out.println(wo.getParameter("indices"));
+
+        printRow(rowRDD.collect().get(6));
+        printRow(rowRDD.collect().get(7));
+        printRow(rowRDD.collect().get(8));
         System.out.println(rowRDD.count());
         JavaRDD<Row> rowRDD4 = wo.executeOperation(jsc,rowRDD);
         //JavaRDD<Row> rowRDD4 = wo.executeOperation(jsc,rowRDD);
@@ -90,9 +91,9 @@ public final class Main {
         //JavaRDD<Row> rowRDD6 = fillColumn(rowRDD, 0, "right");
         //System.out.println(rowRDDP.first());
         //System.out.println(rowRDD.collect().get(2).get(14));
-//        printRow(rowRDD4.collect().get(6));
-//        printRow(rowRDD4.collect().get(7));
-//        printRow(rowRDD4.collect().get(8));
+        printRow(rowRDD4.collect().get(6));
+        printRow(rowRDD4.collect().get(7));
+        printRow(rowRDD4.collect().get(8));
         //printRow(rowRDD4.collect().get(1));
         //printRow(rowRDD6.collect().get(3));
         System.out.println(rowRDD4.count());

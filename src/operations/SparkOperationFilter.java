@@ -33,14 +33,13 @@ public class SparkOperationFilter extends SparkOpration {
         }
         Collections.sort(indecesList2);
         List<Row> list = data.collect();
-        System.out.println(list.size());
+        //System.out.println(list.size());
 
         for (int i = indecesList2.size()-1; i >= 0; i--) {
-            System.out.println(indecesList2.get(i));
-            //this line not working
-            list.remove(indecesList2.get(i));
+            int t = indecesList2.get(i);
+            list.remove(t);
         }
-        System.out.println(list.size());
+        //System.out.println(list.size());
         return jsc.parallelize(list);
     }
 

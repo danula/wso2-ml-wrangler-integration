@@ -1,9 +1,6 @@
 package Wrangler;
 
-import operations.SparkOperationFill;
-import operations.SparkOperationFilter;
-import operations.SparkOperationSplit;
-import operations.SparkOpration;
+import operations.*;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.api.java.Row;
@@ -49,27 +46,15 @@ public class WranglerOperation {
             case "filter":
                 so = new SparkOperationFilter();
                 break;
+            case "drop":
+                so = new SparkOperationDrop();
+                break;
             default:
                 so = null;
-
         }
         return so.execute(jsc,data,this);
     }
 
-
-
-    public WranglerOperation column(String list){
-        return this;
-    }
-    public WranglerOperation table(int index){
-        return this;
-    }
-    public WranglerOperation drop(boolean flag){
-        return this;
-    }
-    public WranglerOperation status(String status){
-        return this;
-    }
     public WranglerOperation result(String result){
         return this;
     }
