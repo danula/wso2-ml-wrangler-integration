@@ -1,34 +1,32 @@
 package operations;
 
+import Wrangler.Wrangler;
 import Wrangler.WranglerOperation;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.sql.api.java.Row;
-
-import java.util.HashMap;
 
 public class SparkOperationDrop extends SparkOpration{
     @Override
-    public JavaRDD<Row> execute(JavaSparkContext jsc, JavaRDD<Row> data, WranglerOperation wranglerOperation) {
-        HashMap<String, String> parameters = wranglerOperation.getParameters();
-        return drop(data,0);
+    public JavaRDD<String[]> execute(JavaSparkContext jsc, JavaRDD<String[]> data, WranglerOperation wranglerOperation, Wrangler wrangler) {
+        String columnName = wranglerOperation.getParameter("column");
+        int columnIndex = wrangler.removeColumn(columnName);
+        return drop(data,columnIndex);
     }
 
-    private static JavaRDD<Row> drop(JavaRDD<Row> data, final int columnId){
-        return data.map(new Function<Row, Row>() {
+    private static JavaRDD<String[]> drop(JavaRDD<String[]> data, final int columnId){
+        return data.map(new Function<String[], String[]>() {
             @Override
-            public Row call(Row row) throws Exception {
-                String[] rowElements = new String[row.length()];
-                for (int i = 0; i < row.length(); i++) {
-                    if (i == columnId) i++;
-                    if (row.isNullAt(i)) {
-                        rowElements[i] = null;
-                    } else {
-                        rowElements[i] = row.getString(i);
+            public String[] call(String[] row) throws Exception {
+                String[] newRow = new String[row.length-1];
+                for (int i = 0,j=0; i < row.length;j++, i++) {
+                    if (i == columnId){
+                        i++;
+                        if(i==row.length) return newRow;
                     }
+                    newRow[j] = row[i];
                 }
-                return Row.create(rowElements);
+                return newRow;
             }
         });
     }

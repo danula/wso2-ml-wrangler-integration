@@ -5,12 +5,26 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.api.java.Row;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
-
 public class WranglerOperation {
-    HashMap<String,String> paramters= new HashMap<>();
+    HashMap<String,String> paramters;
     String operation;
+    WranglerOperation nextOperation;
+
+    public WranglerOperation(){
+        nextOperation = null;
+        paramters = new HashMap<>();
+    }
+
+    public void setNextOperation(WranglerOperation nextOperation) {
+        this.nextOperation = nextOperation;
+    }
+
+    public WranglerOperation getNextOperation() {
+        return nextOperation;
+    }
 
     public String getOperation(){
         return operation;
@@ -34,7 +48,7 @@ public class WranglerOperation {
         System.out.println(param + "\t" + value);
     }
 
-    public JavaRDD<Row> executeOperation(JavaSparkContext jsc, JavaRDD<Row> data){
+    public JavaRDD<String[]> executeOperation(JavaSparkContext jsc, JavaRDD<String[]> data,Wrangler wrangler){
         SparkOpration so;
         switch (this.getOperation()){
             case "split" :
@@ -52,50 +66,16 @@ public class WranglerOperation {
             default:
                 so = null;
         }
-        return so.execute(jsc,data,this);
+        return so.execute(jsc, data, this,wrangler);
     }
 
-    public WranglerOperation result(String result){
-        return this;
+    public void printOperation(){
+        System.out.println(operation);
+        for(String k:paramters.keySet()){
+            System.out.println(k+" - "+paramters.get(k));
+        }
+        System.out.println("================================");
     }
 
-    public WranglerOperation update(boolean b) {
-        return this;
-    }
 
-    public WranglerOperation insert_position(String position) {
-        return this;
-    }
-
-    public WranglerOperation on(String on) {
-        return this;
-    }
-
-    public WranglerOperation before(String before) {
-        return this;
-    }
-
-    public WranglerOperation after(String after) {
-        return this;
-    }
-
-    public WranglerOperation which(int which) {
-        return this;
-    }
-
-    public WranglerOperation max(int max) {
-        return this;
-    }
-
-    public WranglerOperation fill() {
-        return this;
-    }
-
-    public WranglerOperation direction(String direction) {
-        return this;
-    }
-
-    public WranglerOperation method(String method) {
-        return this;
-    }
 }

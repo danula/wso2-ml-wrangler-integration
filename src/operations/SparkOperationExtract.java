@@ -1,5 +1,6 @@
 package operations;
 
+import Wrangler.Wrangler;
 import Wrangler.WranglerOperation;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -12,7 +13,7 @@ import java.util.regex.Pattern;
 public class SparkOperationExtract extends SparkOpration{
 
     @Override
-    public JavaRDD<Row> execute(JavaSparkContext jsc, JavaRDD<Row> data, WranglerOperation wranglerOperation) {
+    public JavaRDD<String[]> execute(JavaSparkContext jsc, JavaRDD<String[]> data, WranglerOperation wranglerOperation, Wrangler wrangler) {
         return null;
     }
 

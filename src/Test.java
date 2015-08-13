@@ -7,7 +7,6 @@ import javax.script.ScriptException;
 public class Test {
     public static void main(String[] args){
         Wrangler wr = new Wrangler();
-        wr.test();
         ScriptEngineManager factory = new ScriptEngineManager();
         ScriptEngine engine = factory.getEngineByName("JavaScript");
         try {

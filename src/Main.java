@@ -1,3 +1,4 @@
+import Wrangler.Wrangler;
 import Wrangler.WranglerOperation;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -39,24 +40,31 @@ public final class Main {
 
         wo = new WranglerOperation();
 
+        Wrangler w = new Wrangler();
+        w.initColumns(numberOfColumns);
+        w.printColumns();
+
+
+
         while(scanner.hasNextLine()){
             String line = scanner.nextLine();
-            flag = parseLine(line,flag,wo);
+            flag = parseLine(line, flag, wo);
         }
 
 
 
         // The schema is encoded in a string
-        String schemaString = "col1 col2";
+        String schemaString = "split split1";
 
         // Generate the schema based on the string of schema
-        final List<StructField> fields = new ArrayList<StructField>();
-        for (String fieldName : schemaString.split(" ")) {
-            fields.add(DataType.createStructField(fieldName, DataType.StringType, true));
-        }
-        StructType schema = DataType.createStructType(fields);
+//        final List<StructField> fields = new ArrayList<StructField>();
+//        for (String fieldName : schemaString.split(" ")) {
+//            fields.add(DataType.createStructField(fieldName, DataType.StringType, true));
+//        }
+//        StructType schema = DataType.createStructType(fields);
 
         JavaRDD<String> data = jsc.textFile("data.txt");
+
 
         //Split data by ',' and save as rows
         JavaRDD<Row> rowRDD = data.map(
@@ -78,11 +86,29 @@ public final class Main {
                     }
                 });
 
-        printRow(rowRDD.collect().get(6));
-        printRow(rowRDD.collect().get(7));
-        printRow(rowRDD.collect().get(8));
-        System.out.println(rowRDD.count());
-        JavaRDD<Row> rowRDD4 = wo.executeOperation(jsc,rowRDD);
+        JavaRDD<String[]> RDD = data.map(
+                new Function<String, String[]>() {
+                    public String[] call(String record) throws Exception {
+                        String[] split = record.split(",");
+                        String[] records = new String[numberOfColumns];
+                        for (int i = 0; i < numberOfColumns; i++) {
+                            if (i < split.length && !split[i].equals("")) {
+                                records[i] = split[i];
+                            } else {
+                                records[i] = null;
+                            }
+                        }
+                        return records;
+                    }
+                });
+
+        w.test(RDD,"script1.js");
+
+        printRow(RDD.collect().get(6));
+        printRow(RDD.collect().get(7));
+        printRow(RDD.collect().get(8));
+        System.out.println(RDD.count());
+        JavaRDD<String[]> RDD4 = w.executeOperations(jsc,RDD);
         //JavaRDD<Row> rowRDD4 = wo.executeOperation(jsc,rowRDD);
         //JavaRDD<Row> rowRDD3 = filter(rowRDD, 1, "4029.3");
         //JavaRDD<Row> rowRDD4 = split(rowRDD, 0, " in ", "[a-zA-Z]+", ".*");
@@ -91,12 +117,11 @@ public final class Main {
         //JavaRDD<Row> rowRDD6 = fillColumn(rowRDD, 0, "right");
         //System.out.println(rowRDDP.first());
         //System.out.println(rowRDD.collect().get(2).get(14));
-        printRow(rowRDD4.collect().get(6));
-        printRow(rowRDD4.collect().get(7));
-        printRow(rowRDD4.collect().get(8));
+        printRow(RDD4.collect().get(6));
+        printRow(RDD4.collect().get(7));
+        printRow(RDD4.collect().get(8));
         //printRow(rowRDD4.collect().get(1));
         //printRow(rowRDD6.collect().get(3));
-        System.out.println(rowRDD4.count());
 
         jsc.stop();
     }
@@ -105,9 +130,9 @@ public final class Main {
 
 
 
-    private static void printRow(Row row) {
-        for (int i = 0; i < row.length(); i++) {
-            System.out.print(row.get(i) + "  ");
+    private static void printRow(String[] row) {
+        for (int i = 0; i < row.length; i++) {
+            System.out.print(row[i] + "  ");
         }
     }
 
@@ -122,7 +147,7 @@ public final class Main {
         }
 
         if(line.startsWith("w.add(")){
-            pattern = Pattern.compile("\\.[a-z_]+\\(");
+            pattern = Pattern.compile("\\.[a-zA-Z_]+\\(");
             matcher = pattern.matcher(line);
             matcher.find();
             matcher.find();
@@ -158,10 +183,12 @@ public final class Main {
                 line = line.substring(matcher.end());
 
                 if(line.matches(".*dw\\.[a-zA-Z_]+\\(.*")){
-
                     System.out.println(line);
                 }
                 String value = line.substring(matcher.groupCount(),line.length()-1);
+                if(param.equals("column")){
+                    if(value.length()>4) value = value.substring(2,value.length()-2);
+                }
                 if(!value.equals("undefined")){
                     wo.addParameter(param, value);
                 }
