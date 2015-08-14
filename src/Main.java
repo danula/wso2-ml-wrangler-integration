@@ -39,17 +39,17 @@ public final class Main {
         boolean flag = false;
 
         wo = new WranglerOperation();
-
         Wrangler w = new Wrangler();
         w.initColumns(numberOfColumns);
-        w.printColumns();
+
+//        w.printColumns();
 
 
 
-        while(scanner.hasNextLine()){
-            String line = scanner.nextLine();
-            flag = parseLine(line, flag, wo);
-        }
+//        while(scanner.hasNextLine()){
+//            String line = scanner.nextLine();
+//            flag = parseLine(line, flag, wo);
+//        }
 
 
 

@@ -76,7 +76,7 @@ public class Wrangler {
             if(flag){
                 this.addNewOperation();
             }
-            System.out.println("##############");
+            //System.out.println("##############");
             return false;
         }
 
@@ -87,21 +87,21 @@ public class Wrangler {
             matcher.find();
             String operation = matcher.group();
             operation = operation.substring(1,operation.length()-1);
-            System.out.println("+++++"+operation+"++++++++");
+            //System.out.println("+++++"+operation+"++++++++");
             wo.setOperation(operation);
             flag = true;
             line = line.substring(9);
         }
         if(line.matches(".*dw\\.[a-zA-Z_]+\\(.*")){
             String l1 = line.substring(1,line.indexOf('('));
-            System.out.println("+++++"+l1+"++++++++");
+            //System.out.println("+++++"+l1+"++++++++");
             pattern = Pattern.compile("\\.[a-zA-Z_]+\\(");
             matcher = pattern.matcher(line);
             matcher.find();
             matcher.find();
             String operation = matcher.group();
             operation = operation.substring(1, operation.length()-1);
-            System.out.println("+++++"+operation+"++++++++");
+            //System.out.println("+++++"+operation+"++++++++");
             wo.addParameter(l1,operation);
 
             line = line.replaceAll(".*dw\\.[a-zA-Z_]+\\(","");
@@ -117,7 +117,7 @@ public class Wrangler {
                 line = line.substring(matcher.end());
 
                 if(line.matches(".*dw\\.[a-zA-Z_]+\\(.*")){
-                    System.out.println(line);
+                    //System.out.println(line);
                 }
                 String value = line.substring(matcher.groupCount(),line.length()-1);
                 if(param.equals("column")){

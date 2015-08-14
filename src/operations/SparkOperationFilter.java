@@ -10,6 +10,7 @@ import org.apache.spark.api.java.function.Function;
 import java.util.*;
 
 public class SparkOperationFilter extends SparkOpration {
+
     @Override
     public JavaRDD<String[]> execute(JavaSparkContext jsc, JavaRDD<String[]> data, WranglerOperation wranglerOperation,Wrangler wrangler) {
         int columnId = wrangler.getColumnId(wranglerOperation);
@@ -22,9 +23,29 @@ public class SparkOperationFilter extends SparkOpration {
                 return filter_rowIndex(jsc, data, wranglerOperation.getParameter("indices"));
             case "eq":
                 return filter(data, columnId, wranglerOperation.getParameter("value"));
+            case "empty":
+                return filter_empty(data);
 
         }
         return null;
+    }
+
+    private JavaRDD<String[]> filter_empty(JavaRDD<String[]> data) {
+        return data.filter(new Function<String[], Boolean>() {
+            @Override
+            public Boolean call(String[] row) throws Exception {
+                if(row==null){
+                    return false;
+                }
+                for(int i=0;i<row.length;i++) {
+                    if (row[i]==null||row[i].equals("")) {
+                        continue;
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     private static JavaRDD<String[]> filter_rowIndex(JavaSparkContext jsc, JavaRDD<String[]> data, String indices) {

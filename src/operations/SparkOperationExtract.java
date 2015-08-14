@@ -17,53 +17,42 @@ public class SparkOperationExtract extends SparkOpration{
         return null;
     }
 
-    private static JavaRDD<Row> extract(JavaRDD<Row> data,final int columnIndex,final String on, final String before,final String after){
-        return data.map(new Function<Row, Row>() {
+    private static JavaRDD<String[]> extract(JavaRDD<String[]> data,final int columnId, final String after, final String before, final String on) {
+        System.out.println("Split - "+columnId+" "+after+" "+before+" "+on);
+        return data.map(new Function<String[], String[]>() {
             @Override
-            public Row call(Row row) throws Exception {
+            public String[] call(String[] row) throws Exception {
                 if (row == null) return null;
-                if (row.isNullAt(columnIndex)) {
-                    String[] list = new String[row.length() + 1];
-                    for (int i = 0, j = 0; i <= row.length(); i++, j++) {
-                        if (row.isNullAt(j)) {
-                            list[i] = null;
-                            if (i == columnIndex) {
-                                i++;
-                                list[i] = null;
-                            }
-                        } else {
-                            list[i] = row.getString(j);
+                if (row[columnId]==null) {
+                    String[] list = new String[row.length + 1];
+                    for(int i=0,j=0;i<row.length;i++,j++){
+                        if(i==columnId){
+                            j++;
+                            list[j]=null;
+                        }else{
+                            list[j] = row[i];
                         }
                     }
-
-                    return Row.create(list);
+                    return list;
                 } else {
-                    String[] list = new String[row.length() + 1];
-                    for (int i = 0, j = 0; i <= row.length(); i++, j++) {
-                        if (columnIndex == i) {
-                            String val = row.getString(j);
+                    String[] list = new String[row.length + 1];
+                    for (int i = 0,j=0; i < row.length; i++,j++) {
+                        if (columnId == i) {
+                            String val = row[i];
                             Pattern pattern = Pattern.compile(after + on + before);
                             Matcher matcher = pattern.matcher(val);
-                            System.out.println(matcher.toString());
                             if (matcher.find()) {
-                                list[i] = val;
-//                                System.out.println(matcher);
-//                                System.out.println(val);
-//                                System.out.println(matcher.start()+" "+after.length()+"  "+matcher.end()+" " +before.length());
-                                list[i + 1] = val.substring(matcher.start() + after.length(), matcher.end() - before.length());
+                                list[j] = val;
+                                list[++j] = val.substring(matcher.start() - matcher.end());
                             } else {
-                                list[i + 1] = null;
+                                list[++j] = null;
                             }
-                            i++;
+
                         } else {
-                            if (row.isNullAt(j)) {
-                                list[i] = null;
-                            } else {
-                                list[i] = row.getString(j);
-                            }
+                            list[j] = row[i];
                         }
                     }
-                    return Row.create(list);
+                    return list;
                 }
             }
         });

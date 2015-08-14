@@ -45,7 +45,7 @@ public class WranglerOperation {
             value = value.substring(1,value.length()-1);
         }
         paramters.put(param,value);
-        System.out.println(param + "\t" + value);
+        //System.out.println(param + "\t" + value);
     }
 
     public JavaRDD<String[]> executeOperation(JavaSparkContext jsc, JavaRDD<String[]> data,Wrangler wrangler){
