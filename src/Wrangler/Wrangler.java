@@ -16,11 +16,13 @@ public class Wrangler {
     WranglerOperation previousOperation;
     ArrayList<String> columns;
     ArrayList<Boolean> columnsSplit;
+    ArrayList<Boolean> columnsExtract;
     WranglerOperation firstOperation;
 
     public Wrangler(){
         columns = new ArrayList<>();
         columnsSplit = new ArrayList<>();
+        columnsExtract = new ArrayList<>();
         currentOperation = null;
         previousOperation = null;
     }

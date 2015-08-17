@@ -63,6 +63,9 @@ public class WranglerOperation {
             case "drop":
                 so = new SparkOperationDrop();
                 break;
+            case "extract":
+                so = new SparkOperationExtract();
+                break;
             default:
                 so = null;
         }
