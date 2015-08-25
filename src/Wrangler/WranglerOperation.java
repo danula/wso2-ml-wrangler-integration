@@ -3,9 +3,7 @@ package Wrangler;
 import operations.*;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.api.java.Row;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class WranglerOperation {
